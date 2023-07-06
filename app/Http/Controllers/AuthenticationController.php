@@ -6,10 +6,14 @@ use App\Http\Requests\AuthRequest;
 use App\Http\Requests\SignUpRequest;
 use App\Http\Resources\UserResource;
 use App\Models\User;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
-use PhpParser\Node\Stmt\TryCatch;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\SignUpMail;
+use Illuminate\Support\Facades\File;
+
 
 class AuthenticationController extends Controller
 {
@@ -45,14 +49,65 @@ class AuthenticationController extends Controller
         try {
             $user = Auth::user();
             $user->tokens()->delete();
-            $this->sendResponse("user loged out");
-        } catch (\Exception $e) {
-            $this->sendError("something went wrong", "");
+            return $this->sendResponse("user loged out");
+        } catch (Exception $e) {
+            return $this->sendError("something went wrong", "", 500);
         }
     }
 
     public function signUp(SignUpRequest $request)
     {
-        dd(request()->input());
+
+        $user = User::firstWhere('email', $request->email);
+        if ($user) {
+            return $this->sendError("email already used", "", 409);
+        }
+
+
+        $user = new User();
+        $user->email_verified_at = null;
+        $user->email = $request->input("email");
+        $user->firstname = $request->input("firstname");
+        $user->lastname = $request->input("lastname");
+        $user->phoneNumber = $request->input("phoneNumber");
+        $user->password = Hash::make($request->password);
+        $user->profile_picture = $user->default_profile;
+        $reg_token = strval(rand(1000000, 99999999));
+        $user->reg_token = Hash::make($reg_token);
+
+
+        try {
+            Mail::to($user)->send(new SignUpMail($reg_token));
+            $user->save();
+            $image_uri = $this->store_profile_picture($user, $request->image);
+            if (!$image_uri) {
+                throw new Exception('could not store the image, using the default picture instead, you still can change this later');
+            }
+            return $this->sendResponse("confirmation mail sent");
+        } catch (Exception $e) {
+            return $this->sendError($e->getMessage(), "something went wrong", 500);
+        }
     }
+
+
+    public function store_profile_picture(User $user, $image)
+    {
+        try {
+            $pattern = '/^(\w+)\|(.+)$/';
+            if (!preg_match($pattern, $image, $matches)) {
+                throw new Exception('Invalid image format');
+            }
+            $image_ext = explode('|', $image)[0];
+            $image_b64 = explode('|', $image)[1];
+
+            $image_b64 = str_replace(' ', '+', $image_b64);
+            $imageName = $user->id . '.' . $image_ext;
+            $image_uri = storage_path() . '/app/public/profile_pictures/' . $imageName;
+            File::put($image_uri, base64_decode($image_b64));
+            return $image_uri;
+        } catch (Exception $e) {
+            return false;
+        }
+    }
+
 }

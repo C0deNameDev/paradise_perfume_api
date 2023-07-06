@@ -19,7 +19,11 @@ class User extends Authenticatable
 
     public $timestamps = true;
 
+    public $default_profile ;
 
+    public function __construct() {
+        $this->default_profile = storage_path() . '/app/public/profile_pictures/default.png' ;
+    }
     /**
      * 
      * The attributes that are mass assignable.
@@ -29,8 +33,11 @@ class User extends Authenticatable
     protected $fillable = [
         'first name',
         'last name',
+        'phoneNumber',
         'email',
         'password',
+        'image',
+        'reg_token'
     ];
 
     /**
@@ -40,7 +47,6 @@ class User extends Authenticatable
      */
     protected $hidden = [
         'password',
-        'remember_token',
     ];
 
     /**

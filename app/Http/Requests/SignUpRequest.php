@@ -25,7 +25,8 @@ class SignUpRequest extends BaseRequest
             "email" => "required|email",
             "firstname" => "required|string|max:50",
             "lastname" => "required|string|max:50",
-            "image" => "string|image|nullable",
+            "phoneNumber" => "required|string|max:10|min:10",
+            "image" => "string|nullable",
             "password" => "required|string|min:8|max:100",
             "confirmPassword" => "required|string|same:password"
         ];

@@ -15,11 +15,12 @@ return new class extends Migration {
             $table->string('firstname');
             $table->string('lastname');
             $table->string('email')->unique();
+            $table->string('profile_picture');
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->rememberToken();
             $table->timestamps();
-
+            $table->string('phoneNumber');
+            $table->string('reg_token');
             $table->string('person_type')->nullable();
             $table->unsignedBigInteger('person_id')->nullable();
         });
