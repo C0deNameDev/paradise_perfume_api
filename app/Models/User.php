@@ -4,33 +4,33 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Sanctum\HasApiTokens;
-use Illuminate\Database\Eloquent\Relations\MorphTo;
-
 
 class User extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
-    /** 
-     * @var bool
-     * */ 
 
-    public $timestamps = true;
-    
-    
     /**
-     * 
+     * @var bool
+     * */
+    public $timestamps = true;
+
+    /**
      * The attributes that are mass assignable.
      *
      * @var array<int, string>
      */
     protected $fillable = [
-        'first name',
-        'last name',
+        'first_name',
+        'last_name',
+        'phone_number',
         'email',
         'password',
+        'profile_picture',
+        'reg_token',
     ];
 
     /**
@@ -53,7 +53,7 @@ class User extends Authenticatable
         'password' => 'hashed',
     ];
 
-    public function person() : MorphTo
+    public function person(): MorphTo
     {
         return $this->morphTo(__FUNCTION__, 'person_type', 'person_id');
     }
