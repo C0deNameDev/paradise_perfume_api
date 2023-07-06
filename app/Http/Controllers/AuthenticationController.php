@@ -67,9 +67,9 @@ class AuthenticationController extends Controller
         $user = new User();
         $user->email_verified_at = null;
         $user->email = $request->input('email');
-        $user->firstname = $request->input('firstname');
-        $user->lastname = $request->input('lastname');
-        $user->phoneNumber = $request->input('phoneNumber');
+        $user->first_name = $request->input('firstname');
+        $user->last_name = $request->input('lastname');
+        $user->phone_number = $request->input('phoneNumber');
         $user->password = Hash::make($request->password);
         $user->profile_picture = $user->default_profile;
         $reg_token = strval(rand(1000000, 99999999));
@@ -79,9 +79,12 @@ class AuthenticationController extends Controller
             Mail::to($user)->send(new SignUpMail($reg_token));
             $user->save();
             $image_uri = $this->store_profile_picture($user, $request->image);
+            $message = 'confirmation mail sent';
             if (! $image_uri) {
-                throw new Exception('could not store the image, using the default picture instead, you still can change this later');
+                $message = $message.', but could not store the image, using the default picture instead, you still can change this later';
             }
+            $user->profile_picture = $image_uri;
+            $user->save();
 
             return $this->sendResponse('confirmation mail sent');
         } catch (Exception $e) {
