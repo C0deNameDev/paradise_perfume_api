@@ -68,9 +68,9 @@ class AuthenticationController extends Controller
         $user = new User();
         $user->email_verified_at = null;
         $user->email = $request->input('email');
-        $user->first_name = $request->input('firstname');
-        $user->last_name = $request->input('lastname');
-        $user->phone_number = $request->input('phoneNumber');
+        $user->first_name = $request->input('first_name');
+        $user->last_name = $request->input('last_name');
+        $user->phone_number = $request->input('phone_number');
         $user->password = Hash::make($request->password);
         $user->profile_picture = $user->default_profile;
         $reg_token = strval(rand(1000000, 99999999));
@@ -78,18 +78,17 @@ class AuthenticationController extends Controller
 
         try {
             Mail::to($user)->send(new SignUpMail($reg_token));
-            // $user->save();
-            // $image_uri = $this->store_profile_picture($user, $request->image);
-            // $message = 'confirmation mail sent';
-            // if (! $image_uri) {
-            //     $message = $message.', but could not store the image, using the default picture instead, you still can change this later';
-            // }
-            // $user->profile_picture = $image_uri;
-            // $user->save();
+            $user->save();
+            $image_uri = $this->store_profile_picture($user, $request->profile_picture);
+            $message = 'confirmation mail sent';
+            if (! $image_uri) {
+                $message = $message.', but could not store the image, using the default picture instead, you still can change this later';
+            }
+            $user->profile_picture = $image_uri;
+            $user->save();
 
-            return $this->sendResponse('confirmation mail sent');
+            return $this->sendResponse($message);
         } catch (Exception $e) {
-            // print_r($e);
 
             return $this->sendError($e->getMessage(), 'something went wrong', 500);
         }
@@ -99,12 +98,12 @@ class AuthenticationController extends Controller
     {
         try {
             $pattern = '/^(\w+)\|(.+)$/';
+
             if (! preg_match($pattern, $image, $matches)) {
                 throw new Exception('Invalid image format');
             }
             $image_ext = explode('|', $image)[0];
             $image_b64 = explode('|', $image)[1];
-
             $image_b64 = str_replace(' ', '+', $image_b64);
             $imageName = $user->id.'.'.$image_ext;
             $image_uri = storage_path().'/app/public/profile_pictures/'.$imageName;

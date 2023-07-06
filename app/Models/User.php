@@ -23,6 +23,13 @@ class User extends Authenticatable
      *
      * @var array<int, string>
      */
+    public $default_profile;
+
+    public function __construct()
+    {
+        $this->default_profile = storage_path().'/app/public/profile_pictures/default.png';
+    }
+
     protected $fillable = [
         'first_name',
         'last_name',
