@@ -60,6 +60,7 @@ class AuthenticationController extends Controller
     {
 
         $user = User::firstWhere('email', $request->email);
+        // dd($user);
         if ($user) {
             return $this->sendError('email already used', '', 409);
         }
@@ -77,17 +78,19 @@ class AuthenticationController extends Controller
 
         try {
             Mail::to($user)->send(new SignUpMail($reg_token));
-            $user->save();
-            $image_uri = $this->store_profile_picture($user, $request->image);
-            $message = 'confirmation mail sent';
-            if (! $image_uri) {
-                $message = $message.', but could not store the image, using the default picture instead, you still can change this later';
-            }
-            $user->profile_picture = $image_uri;
-            $user->save();
+            // $user->save();
+            // $image_uri = $this->store_profile_picture($user, $request->image);
+            // $message = 'confirmation mail sent';
+            // if (! $image_uri) {
+            //     $message = $message.', but could not store the image, using the default picture instead, you still can change this later';
+            // }
+            // $user->profile_picture = $image_uri;
+            // $user->save();
 
             return $this->sendResponse('confirmation mail sent');
         } catch (Exception $e) {
+            // print_r($e);
+
             return $this->sendError($e->getMessage(), 'something went wrong', 500);
         }
     }

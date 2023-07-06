@@ -3,7 +3,6 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
@@ -14,12 +13,13 @@ class SignUpMail extends Mailable
     use Queueable, SerializesModels;
 
     public $code;
+
     /**
      * Create a new message instance.
      */
     public function __construct(string $code)
     {
-        $this ->code = $code;
+        $this->code = $code;
     }
 
     /**
@@ -38,11 +38,9 @@ class SignUpMail extends Mailable
     public function content(): Content
     {
         return (new Content())
-        ->view('mails.signUpConfirmation')
-        ->with('code', $this->code);
+            ->view('mails.signUpConfirmation')
+            ->with('code', $this->code);
     }
-
-   
 
     /**
      * Get the attachments for the message.
