@@ -6,10 +6,12 @@ use App\Http\Requests\AuthRequest;
 use App\Http\Requests\SignUpRequest;
 use App\Http\Resources\UserResource;
 use App\Mail\SignUpMail;
+use App\Models\Card;
+use App\Models\Client;
 use App\Models\User;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\File;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 
@@ -25,8 +27,6 @@ class AuthenticationController extends Controller
         $reqEmail = $request->email;
         $user = User::firstWhere('email', $reqEmail);
         if ($user) {
-
-            // return (response()->json([$user]));
             if (Hash::check($request->password, $user->password)) {
                 $accessToken = $user->createToken('auth_token')->plainTextToken;
                 $result = [
@@ -58,14 +58,16 @@ class AuthenticationController extends Controller
 
     public function signUp(SignUpRequest $request)
     {
-
+        // check if email already registered
         $user = User::firstWhere('email', $request->email);
-        // dd($user);
         if ($user) {
             return $this->sendError('email already used', '', 409);
         }
 
+        // create the new user's object
         $user = new User();
+
+        // populate columns
         $user->email_verified_at = null;
         $user->email = $request->input('email');
         $user->first_name = $request->input('first_name');
@@ -73,13 +75,21 @@ class AuthenticationController extends Controller
         $user->phone_number = $request->input('phone_number');
         $user->password = Hash::make($request->password);
         $user->profile_picture = $user->default_profile;
+
+        // generate the singUp confirmation code
         $reg_token = strval(rand(1000000, 99999999));
         $user->reg_token = Hash::make($reg_token);
 
         try {
+            // send the code via email
             Mail::to($user)->send(new SignUpMail($reg_token));
+
+            // if no errors save the user to db
             $user->save();
-            $image_uri = $this->store_profile_picture($user, $request->profile_picture);
+
+            // handle user's profile picture
+            $userController = new UserController();
+            $image_uri = $userController->store_profile_picture($user, $request->profile_picture);
             $message = 'confirmation mail sent';
             if (! $image_uri) {
                 $message = $message.', but could not store the image, using the default picture instead, you still can change this later';
@@ -87,31 +97,43 @@ class AuthenticationController extends Controller
             $user->profile_picture = $image_uri;
             $user->save();
 
-            return $this->sendResponse($message);
+            return $this->sendResponse($message, new UserResource($user));
         } catch (Exception $e) {
 
             return $this->sendError($e->getMessage(), 'something went wrong', 500);
         }
     }
 
-    public function store_profile_picture(User $user, $image)
+    public function validateSignUp($userId, $code)
     {
-        try {
-            $pattern = '/^(\w+)\|(.+)$/';
+        $user = User::find($userId);
 
-            if (! preg_match($pattern, $image, $matches)) {
-                throw new Exception('Invalid image format');
-            }
-            $image_ext = explode('|', $image)[0];
-            $image_b64 = explode('|', $image)[1];
-            $image_b64 = str_replace(' ', '+', $image_b64);
-            $imageName = $user->id.'.'.$image_ext;
-            $image_uri = storage_path().'/app/public/profile_pictures/'.$imageName;
-            File::put($image_uri, base64_decode($image_b64));
-
-            return $image_uri;
-        } catch (Exception $e) {
-            return false;
+        if (! $user) {
+            return $this->sendError('user not found', '', 401);
         }
+
+        if ($user->email_verified_at) {
+            return $this->sendError('email already verified', '', 200);
+        }
+
+        if (! Hash::check($code, $user->reg_token)) {
+            return $this->sendError('invalid code', '', 401);
+        }
+        // mark the account as activated
+        $user->email_verified_at = Carbon::now();
+        $user->reg_token = null;
+
+        // Create the client instance for this user
+        $client = Client::create();
+        $user->person()->associate($client);
+        $user->person_type = $user->types['client'];
+
+        // assign a card to this client
+        Card::create(['client_id' => $client->id]);
+
+        // save the new user to the database
+        $user->save();
+
+        return $this->sendResponse('validated');
     }
 }
