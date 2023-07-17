@@ -13,9 +13,7 @@ return new class extends Migration
     {
         Schema::create('purchases', function (Blueprint $table) {
             $table->id();
-            $table->string('perfume');
-            $table->string('bottle');
-            $table->double('totalPrice');
+            $table->double('total_price');
             $table->date('date');
             $table->unsignedBigInteger('card_id')->nullable();
             $table->foreign('card_id')->references('id')->on('cards');

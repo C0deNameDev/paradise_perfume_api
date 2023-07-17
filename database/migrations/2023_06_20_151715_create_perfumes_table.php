@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('picture');
-            $table->integer('priceExtra');
+            $table->integer('extra_price');
             $table->timestamps();
         });
     }

@@ -22,12 +22,11 @@ class PurchaseFactory extends Factory
     {
         $perfumeName = Perfume::inRandomOrder()->first()->name;
         $bottle = Bottle::inRandomOrder()->first();
+
         return [
-            'perfume' => $perfumeName,
-            'bottle' => $bottle->volume.' ml',
-            'totalPrice' => rand(150, 5000),
+            'total_price' => rand(150, 5000),
             'date' => Carbon::now(),
-            'card_id' => Card::inRandomOrder()->first()->id
+            'card_id' => Card::inRandomOrder()->first()->id,
         ];
     }
 }

@@ -5,18 +5,16 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use App\Models\Card;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+
 class Purchase extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'perfume',
-        'bottle',
-        'totalPrice',
+        'total_price',
         'date',
-        'card_id'
+        'card_id',
     ];
 
     public function card(): BelongsTo
@@ -26,6 +24,6 @@ class Purchase extends Model
 
     public function orders(): HasMany
     {
-        return $this -> hasMany(Order::class);
+        return $this->hasMany(Order::class);
     }
 }

@@ -1,17 +1,14 @@
 <?php
 
 namespace Database\Factories;
+
 use App\Models\Characteristic;
 use App\Models\Perfume;
-use Illuminate\Support\Str;
-
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Perfume>
  */
-
-
 class PerfumeFactory extends Factory
 {
     /**
@@ -22,7 +19,7 @@ class PerfumeFactory extends Factory
     public function definition()
     {
         $perfumeNames = [
-        'Enchanted Elixir',
+            'Enchanted Elixir',
             'Midnight Serenade',
             'Velvet Whispers',
             'Pure Bliss',
@@ -31,15 +28,15 @@ class PerfumeFactory extends Factory
             'Mystique Noir',
             'Radiant Bloom',
             'Golden Amber',
-            'Captivating Aura'
+            'Captivating Aura',
         ];
+
         return [
             'name' => $this->faker->unique()->randomElement($perfumeNames),
-            'priceExtra' => $this->faker->numberBetween(0, 1000),
-            'picture' => $this->faker->imageUrl()
+            'extra_price' => $this->faker->numberBetween(0, 1000),
+            'picture' => $this->faker->imageUrl(),
         ];
     }
-
 
     /**
      * Configure the model factory's afterCreating callback.
@@ -49,10 +46,9 @@ class PerfumeFactory extends Factory
     public function configure()
     {
         return $this->afterCreating(function (Perfume $perfume) {
-            $number = fake() -> numberBetween(1, 100);
+            $number = fake()->numberBetween(1, 100);
             $characteristics = Characteristic::pluck('id')->random($number);
             $perfume->characteristics()->attach($characteristics);
         });
     }
 }
-
