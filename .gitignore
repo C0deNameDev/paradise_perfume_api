@@ -67,3 +67,6 @@ Thumbs.db
 .env.dusk
 .env.dusk.testing
 .env.dusk.local
+
+
+.env
