@@ -107,10 +107,10 @@ class AuthenticationController extends Controller
 
         try {
 
-            // $mail = $this->sendEmail($user);
-            // if (! $mail['success']) {
-            //     throw new Exception($mail['message']);
-            // }
+            $mail = $this->sendEmail($user);
+            if (! $mail['success']) {
+                throw new Exception($mail['message']);
+            }
 
             $userController = new UserController();
             $image_uri = $userController->store_profile_picture($user, $request->profile_picture);
@@ -271,6 +271,7 @@ class AuthenticationController extends Controller
                 'data' => '',
             ];
         } catch (Exception $e) {
+            dd($e);
             $response = [
                 'success' => false,
                 'message' => 'errors while sending the mail',

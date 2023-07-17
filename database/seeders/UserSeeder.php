@@ -23,7 +23,7 @@ class UserSeeder extends Seeder
                 'email_verified_at' => null,
                 'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
                 'profile_picture' => $faker->imageUrl,
-                'reg_token' => $faker->text,
+                'one_time_token' => $faker->text,
             ]);
         }
     }
