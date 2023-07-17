@@ -25,6 +25,11 @@ class User extends Authenticatable
      */
     public $default_profile;
 
+    public $types = [
+        'client' => Client::class,
+        'admin' => Admin::class,
+    ];
+
     public function __construct()
     {
         $this->default_profile = storage_path().'/app/public/profile_pictures/default.png';
@@ -37,7 +42,7 @@ class User extends Authenticatable
         'email',
         'password',
         'profile_picture',
-        'reg_token',
+        'one_time_token',
     ];
 
     /**
