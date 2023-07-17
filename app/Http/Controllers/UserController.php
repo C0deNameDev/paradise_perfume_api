@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Exception;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Facades\File;
 
 class UserController extends Controller
@@ -26,6 +27,24 @@ class UserController extends Controller
             return $image_uri;
         } catch (Exception $e) {
             return false;
+        }
+    }
+
+    public function getPicture($userId)
+    {
+        try {
+            $image_array = File::glob(storage_path().'/app/public/profile_pictures/'.$userId.'.*');
+            if (! empty($image_array)) {
+                $binary_image = File::get($image_array[0]);
+                $b64_image = base64_encode($binary_image);
+                // dd($b64_image);
+
+                return $this->sendResponse('picture found', $b64_image);
+            } else {
+                return $this->sendError('picture not found', '', 400);
+            }
+        } catch (FileNotFoundException $fileNotFound) {
+            return $this->sendError('file not found', '', 404);
         }
     }
 }

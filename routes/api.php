@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthenticationController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -16,9 +17,17 @@ use Illuminate\Support\Facades\Route;
 
 Route::controller(AuthenticationController::class)->group(function () {
     Route::get('/auth', 'getAuth')->middleware('auth:sanctum');
-    Route::post('/authenticate', 'authenticate');
     Route::get('/logout', 'logout')->middleware('auth:sanctum');
+    Route::post('/authenticate', 'authenticate');
     Route::post('/signUp', 'signUp');
+    Route::get('/sendCofirmSignUp/{userId}', 'sendCofirmSignUp');
     Route::get('/validateSignUp/{userId}/{code}', 'validateSignUp');
+    Route::get('/forgotPassword/{email}', 'forgotPassword');
+    Route::get('/validateForgotPassword/{userId}/{code}', 'validateForgotPassword');
+    Route::post('/resetPassword', 'resetPassword');
     Route::get('/test', 'test');
+});
+
+Route::controller(UserController::class)->group(function () {
+    Route::get('/userPicture/{userId}', 'getPicture')->middleware('auth:sanctum');
 });
