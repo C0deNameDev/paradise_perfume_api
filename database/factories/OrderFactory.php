@@ -19,15 +19,16 @@ class OrderFactory extends Factory
      */
     public function definition(): array
     {
-        $perfume = Perfume::inRandomOrder() -> first();
-        $bottle = Bottle::inRandomOrder() -> first();
+
         $status = ['pending', 'prepared', 'closed'];
+
         return [
-            'perfume' => $perfume -> name,
-            'bottle' => $bottle->volume.' ml',
-            'quantity'=> fake() -> randomNumber(1, 10),
-            'status' => fake() -> randomElement($status),
-            'purchase_id' => Purchase::inRandomOrder()->first()->id
+            'quantity' => fake()->randomNumber(1, 10),
+            'status' => fake()->randomElement($status),
+            'purchase_id' => Purchase::inRandomOrder()->first()->id,
+            'bottle_id' => Bottle::inRandomOrder()->first()->id,
+            'perfume_id' => Perfume::inRandomOrder()->first()->id,
         ];
+
     }
 }

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Bottle extends Model
 {
@@ -12,6 +13,11 @@ class Bottle extends Model
     protected $fillable = [
         'volume' => 'required|double',
         'price' => 'required|double',
-        'picture' => 'required'
+        'picture' => 'required',
     ];
+
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
+    }
 }
