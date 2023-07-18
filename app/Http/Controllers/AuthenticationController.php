@@ -40,17 +40,7 @@ class AuthenticationController extends Controller
         try {
             if ($user) {
                 if (Hash::check($request->password, $user->password)) {
-                    // if (! $user->email_verified_at) {
-                    //     $one_time_token = strval(rand(1000000, 99999999));
-                    //     $user->one_time_token = Hash::make($one_time_token);
-                    //     // send the code via email
-                    //     Mail::to($user)->send(new SignUpMail($one_time_token));
 
-                    //     // if no errors save the user to db
-                    //     $user->save();
-
-                    //     return $this->sendError('email not verified', new UserResource($user), 403);
-                    // }
                     $token = $user->createToken('auth_token')->plainTextToken;
                     $result = [
                         'user' => new UserResource($user),
@@ -103,14 +93,7 @@ class AuthenticationController extends Controller
         $user->profile_picture = $user->default_profile;
         $user->save();
 
-        // generate the singUp confirmation code
-
         try {
-
-            $mail = $this->sendEmail($user);
-            if (! $mail['success']) {
-                throw new Exception($mail['message']);
-            }
 
             $userController = new UserController();
             $image_uri = $userController->store_profile_picture($user, $request->profile_picture);

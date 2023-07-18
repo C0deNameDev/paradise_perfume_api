@@ -25,7 +25,7 @@ class UserController extends Controller
             $imgKit = new ImageKitProvider();
 
             $imageUpload = $imgKit->store_profile_b64($image_b64, $image_name);
-            print_r($imageUpload);
+
             if ($imageUpload) {
                 return $imageUpload->result->name;
             }
