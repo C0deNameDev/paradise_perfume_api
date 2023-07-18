@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AuthenticationController;
+use App\Http\Controllers\PerfumeController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -28,6 +29,10 @@ Route::controller(AuthenticationController::class)->group(function () {
     Route::get('/test', 'test');
 });
 
+Route::controller(PerfumeController::class)->prefix('/perfumes')->group(function () {
+    Route::get('/{perfume_id}', 'get_by_id')->middleware('auth:sanctum');
+});
+
 Route::controller(UserController::class)->group(function () {
-    Route::get('/userPicture/{userId}', 'getPicture')->middleware('auth:sanctum');
+    Route::get('/userPicture/{user_id}', 'get_profile_picture')->middleware('auth:sanctum');
 });

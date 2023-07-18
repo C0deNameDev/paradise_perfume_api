@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Exception;
-use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Facades\File;
 
 class UserController extends Controller
@@ -17,34 +16,44 @@ class UserController extends Controller
             if (! preg_match($pattern, $image, $matches)) {
                 throw new Exception('Invalid image format');
             }
-            $image_ext = explode('|', $image)[0];
+
             $image_b64 = explode('|', $image)[1];
             $image_b64 = str_replace(' ', '+', $image_b64);
-            $imageName = $user->id.'.'.$image_ext;
-            $image_uri = storage_path().'/app/public/profile_pictures/'.$imageName;
-            File::put($image_uri, base64_decode($image_b64));
+            $image_name = 'profile_'.$user->id;
+            // $image_uri = storage_path().'/app/public/profile_pictures/'.$imageName;
+            // File::put($image_uri, base64_decode($image_b64));
+            $imgKit = new ImageKitProvider();
 
-            return $image_uri;
+            $imageUpload = $imgKit->store_profile_b64($image_b64, $image_name);
+            print_r($imageUpload);
+            if ($imageUpload) {
+                return $imageUpload->result->name;
+            }
+
+            return false;
         } catch (Exception $e) {
             return false;
         }
     }
 
-    public function getPicture($userId)
+    public function get_profile_picture($user_id)
     {
         try {
-            $image_array = File::glob(storage_path().'/app/public/profile_pictures/'.$userId.'.*');
-            if (! empty($image_array)) {
-                $binary_image = File::get($image_array[0]);
-                $b64_image = base64_encode($binary_image);
-                // dd($b64_image);
-
-                return $this->sendResponse('picture found', $b64_image);
-            } else {
-                return $this->sendError('picture not found', '', 400);
+            $user = USER::find($user_id);
+            $imageKit = new ImageKitProvider();
+            if (! $user) {
+                return $this->sendError('user not found', '', 404);
             }
-        } catch (FileNotFoundException $fileNotFound) {
-            return $this->sendError('file not found', '', 404);
+            $picture = $imageKit->get_profile_picture($user->profile_picture);
+            if ($picture) {
+                return $this->sendResponse('picture found', $picture);
+            }
+
+            return $this->sendError('could not fetch image', '', 500);
+
+        } catch (Exception $e) {
+
+            return $this->sendError('error', '', 500);
         }
     }
 }

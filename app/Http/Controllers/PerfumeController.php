@@ -15,6 +15,15 @@ class PerfumeController extends Controller
         //
     }
 
+    public function get_by_id($perfume_id)
+    {
+        $perfume = Perfume::find($perfume_id);
+        if (! $perfume) {
+            return $this->sendError('Perfume not found', '', 404);
+        }
+        dd($perfume);
+    }
+
     /**
      * Show the form for creating a new resource.
      */
