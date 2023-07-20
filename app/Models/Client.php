@@ -11,15 +11,25 @@ class Client extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'first_name',
+        'last_name',
+        'phone_number',
+
+    ];
 
     public function user(): MorphOne
     {
         return $this->morphOne(User::class, 'person');
     }
 
-
     public function cards(): HasMany
     {
-        return $this -> hasMany(Card::class);
+        return $this->hasMany(Card::class);
+    }
+
+    public function orders(): HasMany
+    {
+        return $this->hasMany(Order::class);
     }
 }

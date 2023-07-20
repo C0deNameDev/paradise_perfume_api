@@ -16,6 +16,8 @@ return new class extends Migration
             $table->string('name');
             $table->string('picture');
             $table->integer('extra_price');
+            $table->string('sex');
+            $table->string('season');
             $table->timestamps();
         });
     }

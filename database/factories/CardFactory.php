@@ -2,7 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Models\Card;
 use App\Models\Client;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -22,12 +21,4 @@ class CardFactory extends Factory
             'client_id' => Client::inRandomOrder()->first()->id,
         ];
     }
-
-    // public function configure(){
-    //     return $this->afterCreating(function(Card $card){
-
-    //         $client = Client::inRandomOrder()->first();
-    //         $card -> client() -> associate($client);
-    //     });
-    // }
 }

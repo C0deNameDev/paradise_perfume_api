@@ -12,6 +12,7 @@ use App\Models\Card;
 use App\Models\Client;
 use App\Models\User;
 use Carbon\Carbon;
+use DB;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -50,11 +51,11 @@ class AuthenticationController extends Controller
                     return $this->sendResponse('user authenticated', $result);
                 }
 
-                return $this->sendError('wrong password', '', 401);
+                return $this->sendError('wrong password', '', 200);
 
             }
 
-            return $this->sendError('wrong email', '', 401);
+            return $this->sendError('wrong email', '', 200);
         } catch (Exception $e) {
             return $this->sendError($e->getMessage(), 'something went wrong', 500);
         }
@@ -74,26 +75,39 @@ class AuthenticationController extends Controller
 
     public function signUp(SignUpRequest $request)
     {
-        // check if email already registered
-        $user = User::firstWhere('email', $request->email);
-        if ($user) {
-            return $this->sendError('email already used', '', 409);
-        }
-
-        // create the new user's object
-        $user = new User();
-
-        // populate columns
-        $user->email_verified_at = null;
-        $user->email = $request->input('email');
-        $user->first_name = $request->input('first_name');
-        $user->last_name = $request->input('last_name');
-        $user->phone_number = $request->input('phone_number');
-        $user->password = Hash::make($request->password);
-        $user->profile_picture = $user->default_profile;
-        $user->save();
 
         try {
+            DB::beginTransaction();
+            // check if email already registered
+            $user = User::firstWhere('email', $request->email);
+            if ($user) {
+                return $this->sendError('email already used', '', 409);
+            }
+
+            // create the new user's object
+            $user = new User();
+
+            // populate columns
+            $user->email_verified_at = null;
+            $user->email = $request->input('email');
+
+            $user->password = Hash::make($request->password);
+            $user->profile_picture = $user->default_profile;
+
+            $client = Client::create([
+                'first_name' => $request->input('first_name'),
+                'last_name' => $request->input('last_name'),
+                'phone_number' => $request->input('phone_number'),
+            ]);
+            $user->person()->associate($client);
+            $user->person_id = $client->id;
+            $user->person_type = Client::class;
+
+            // assign a card to this client
+            $card = new Card();
+            $client->cards()->save($card);
+
+            $user->save();
 
             $userController = new UserController();
             $image_uri = $userController->store_profile_picture($user, $request->profile_picture);
@@ -103,6 +117,7 @@ class AuthenticationController extends Controller
             }
             $user->profile_picture = $image_uri;
             $user->save();
+            DB::commit();
 
             return $this->sendResponse($message, new UserResource($user));
         } catch (Exception $e) {
@@ -123,20 +138,12 @@ class AuthenticationController extends Controller
             return $this->sendError('email already verified', '', 200);
         }
 
-        if (! $this->validateOneTimeToken($user->id, $code)) {
+        if (! ($this->validateOneTimeToken($user->id, $code)['success'])) {
             return $this->sendError('invalid code', '', 401);
         }
         // mark the account as activated
         $user->email_verified_at = Carbon::now();
         $user->one_time_token = null;
-
-        // Create the client instance for this user
-        $client = Client::create();
-        $user->person()->associate($client);
-        $user->person_type = $user->types['client'];
-
-        // assign a card to this client
-        Card::create(['client_id' => $client->id]);
 
         // save the new user to the database
         $user->save();
@@ -180,7 +187,7 @@ class AuthenticationController extends Controller
 
     public function resetPassword(ResetPasswordRequest $request)
     {
-        $user = User::find($request->input('userId'));
+        $user = User::find($request->input('user_id'));
         if (! $user) {
             return $this->sendError('user not found', '', 404);
         }
@@ -207,6 +214,7 @@ class AuthenticationController extends Controller
         $user = User::find($userId);
         if ($user) {
             if ($user->one_time_token) {
+
                 if (Hash::check($token, $user->one_time_token)) {
                     $response = [
                         'success' => true,

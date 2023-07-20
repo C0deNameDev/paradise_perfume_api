@@ -19,10 +19,17 @@ class Perfume extends Model
         'name',
         'extra_price',
         'picture',
+        'sex',
+        'season',
     ];
 
     public function characteristics(): BelongsToMany
     {
         return $this->belongsToMany(Characteristic::class);
+    }
+
+    public function orders(): BelongsToMany
+    {
+        return $this->belongsToMany(Order::class);
     }
 }

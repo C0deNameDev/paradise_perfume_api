@@ -31,8 +31,14 @@ class PerfumeFactory extends Factory
             'Captivating Aura',
         ];
 
+        $sex = ['F', 'M'];
+
+        $seasons = ['winter', 'summer', 'spring', 'fall'];
+
         return [
             'name' => $this->faker->unique()->randomElement($perfumeNames),
+            'sex' => $this->faker->randomElement($sex),
+            'season' => $this->faker->randomElement($seasons),
             'extra_price' => $this->faker->numberBetween(0, 1000),
             'picture' => $this->faker->imageUrl(),
         ];

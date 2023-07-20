@@ -13,7 +13,9 @@ class BottleController extends Controller
      */
     public function index()
     {
-        //
+        $bottles = Bottle::all(['id', 'volume', 'picture', 'price']);
+
+        return $this->sendResponse('', $bottles);
     }
 
     /**

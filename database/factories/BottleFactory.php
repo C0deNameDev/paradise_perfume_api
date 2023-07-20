@@ -16,12 +16,13 @@ class BottleFactory extends Factory
      */
     public function definition(): array
     {
+        $tmpPics = ['one', 'two'];
         $volumes = [
             10,
             15,
             100,
             300,
-            200
+            200,
         ];
 
         $prices = [
@@ -31,11 +32,12 @@ class BottleFactory extends Factory
             200 => 800,
             300 => 1100,
         ];
-        $volume = fake() -> randomElement($volumes);
+        $volume = fake()->randomElement($volumes);
+
         return [
             'volume' => $volume,
             'price' => $prices[$volume],
-            'picture' => fake()->imageUrl()
+            'picture' => fake()->randomElement($tmpPics),
         ];
     }
 }

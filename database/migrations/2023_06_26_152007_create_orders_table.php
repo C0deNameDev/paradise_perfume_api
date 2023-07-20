@@ -14,14 +14,14 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
-            $table->integer('quantity');
-            $table->string('status');
-            $table->unsignedBigInteger('purchase_id');
-            $table->unsignedBigInteger('bottle_id');
+            // $table->integer('quantity');
+            $table->string('status')->default('pending');
+            $table->unsignedBigInteger('client_id');
+            // $table->unsignedBigInteger('bottle_id');
             $table->unsignedBigInteger('perfume_id');
-            $table->foreign('purchase_id')->references('id')->on('purchases');
-            $table->foreign('bottle_id')->references('id')->on('bottles');
+            // $table->foreign('bottle_id')->references('id')->on('bottles');
             $table->foreign('perfume_id')->references('id')->on('perfumes');
+            $table->foreign('client_id')->references('id')->on('clients');
         });
 
     }

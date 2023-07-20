@@ -5,27 +5,28 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Order extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'bottle_id',
+        // 'bottle_id',
         'perfume_id',
-        'quantity',
-        'purchase_id',
+        // 'quantity',
         'status',
+        'client_id',
     ];
 
-    public function purchase(): BelongsTo
+    public function bottles(): BelongsToMany
     {
-        return $this->belongsTo(Purchase::class);
+        return $this->belongsToMany(Bottle::class);
     }
 
-    public function bottle(): BelongsTo
+    public function client(): BelongsTo
     {
-        return $this->belongsTo(Bottle::class);
+        return $this->belongsTo(Client::class);
     }
 
     public function perfume(): BelongsTo

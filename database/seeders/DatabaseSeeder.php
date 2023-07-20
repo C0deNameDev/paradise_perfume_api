@@ -19,9 +19,8 @@ class DatabaseSeeder extends Seeder
             PerfumeSeeder::class,
             BottleSeeder::class,
             CardSeeder::class,
-            PurchaseSeeder::class,
-            OrderSeeder::class
+            OrderSeeder::class,
         ]);
-        
+
     }
 }
