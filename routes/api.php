@@ -34,7 +34,7 @@ Route::controller(AuthenticationController::class)->group(function () {
 Route::controller(PerfumeController::class)->prefix('/perfumes')->group(function () {
     Route::get('/', 'index')->middleware('auth:sanctum');
     Route::get('/{perfume_id}', 'get_by_id')->middleware('auth:sanctum');
-    Route::get('/perfumePicture/{perfume_id}', 'get_perfume_picture');
+    Route::get('/perfumePicture/{perfume_id}', 'get_perfume_picture')->middleware('auth:sanctum');
 
 });
 

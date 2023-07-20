@@ -40,7 +40,7 @@ class PerfumeFactory extends Factory
             'sex' => $this->faker->randomElement($sex),
             'season' => $this->faker->randomElement($seasons),
             'extra_price' => $this->faker->numberBetween(0, 1000),
-            'picture' => $this->faker->imageUrl(),
+            'picture' => null,
         ];
     }
 

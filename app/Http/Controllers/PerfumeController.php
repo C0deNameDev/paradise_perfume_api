@@ -50,7 +50,7 @@ class PerfumeController extends Controller
 
             $perfume = $this->perfume::find($perfume_id);
             if (! $perfume) {
-                return $this->sendError('perfume not found', '', 401);
+                return $this->sendError('perfume not found', '', 404);
             }
 
             $perfume_picture = $this->imageKitProvider->get_perfume_picture($perfume->picture);

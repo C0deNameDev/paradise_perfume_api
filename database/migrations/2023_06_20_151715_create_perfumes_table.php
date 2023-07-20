@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('perfumes', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->string('picture');
+            $table->string('picture')->nullable();
             $table->integer('extra_price');
             $table->string('sex');
             $table->string('season');
