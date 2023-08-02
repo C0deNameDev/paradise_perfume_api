@@ -58,15 +58,32 @@ class ImageKitProvider
         }
     }
 
-    public function get_perfume_picture($perfume_name)
+    public function get_perfume_picture($picture_name)
     {
         try {
-            $imageKitUrl = env('IMAGEKIT_HOST').env('IMAGEKIT_ID').'/perfumes/'.$perfume_name;
+            $imageKitUrl = env('IMAGEKIT_HOST').env('IMAGEKIT_ID').'/perfumes/'.$picture_name;
 
             $client = new Client();
             $response = $client->get($imageKitUrl);
             if ($response->getStatusCode() === 200) {
                 // dd(base64_encode($response->getBody()->getContents()));
+
+                return base64_encode($response->getBody()->getContents());
+            }
+
+            return false;
+        } catch (Exception $e) {
+        }
+    }
+
+    public function get_bottle_picture($picture_name)
+    {
+        try {
+            $imageKitUrl = env('IMAGEKIT_HOST').env('IMAGEKIT_ID').'/bottles/'.$picture_name;
+
+            $client = new Client();
+            $response = $client->get($imageKitUrl);
+            if ($response->getStatusCode() === 200) {
 
                 return base64_encode($response->getBody()->getContents());
             }

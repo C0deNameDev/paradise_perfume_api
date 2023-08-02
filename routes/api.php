@@ -31,27 +31,33 @@ Route::controller(AuthenticationController::class)->group(function () {
     Route::get('/test', 'test');
 });
 
-Route::controller(PerfumeController::class)->prefix('/perfumes')->group(function () {
-    Route::get('/', 'index')->middleware('auth:sanctum');
-    Route::get('/{perfume_id}', 'get_by_id')->middleware('auth:sanctum');
-    Route::get('/perfumePicture/{perfume_id}', 'get_perfume_picture')->middleware('auth:sanctum');
+Route::controller(PerfumeController::class)->prefix('/perfumes')->middleware('auth:sanctum')->group(function () {
+    Route::get('/page', 'paginate');
+    Route::get('/', 'index');
+    Route::get('/{perfume_id}', 'get_by_id');
+    Route::get('/perfumePicture/{perfume_id}', 'get_perfume_picture');
+    Route::get('/details/{perfume_id}', 'get_details');
 
 });
 
-Route::controller(UserController::class)->group(function () {
+Route::controller(UserController::class)->prefix('/user')->group(function () {
     Route::get('/userPicture/{user_id}', 'get_profile_picture')->middleware('auth:sanctum');
 });
 
 Route::controller(BottleController::class)->prefix('/bottles')->group(function () {
     Route::get('/', 'index');
+    Route::get('/{order_id}', 'get_by_order');
+    Route::get('/{bottle_id}', 'get_by_id');
+    Route::get('/picture/{bottle_id}', 'get_bottle_picture');
 });
 
 Route::controller(OrderController::class)->prefix('/orders')->group(function () {
     Route::post('/placeOrder', 'store');
-    Route::get('/{order_id}/delete', 'destroy');
-    Route::get('/client/{client_id}', 'get_client_orders');
+    Route::get('/delete/{order_id}', 'destroy');
+    // Route::get('/client/{client_id}', 'get_client_orders');
     Route::get('/{order_id}/{bottle_id}/mark_prepared', 'mark_prepared');
     Route::get('/{order_id}/{bottle_id}/mark_pending', 'mark_pending');
     Route::get('/{order_id}/{bottle_id}/delete', 'delete_bottle_from_order');
+    Route::get('/client/{user_id}', 'get_by_client');
 
 });

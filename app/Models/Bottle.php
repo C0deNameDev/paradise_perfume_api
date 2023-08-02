@@ -18,6 +18,6 @@ class Bottle extends Model
 
     public function orders(): BelongsToMany
     {
-        return $this->belongsToMany(Order::class);
+        return $this->belongsToMany(Order::class, 'bottle_order')->withPivot(['quantity', 'bottle_id', 'order_id', 'status']);
     }
 }

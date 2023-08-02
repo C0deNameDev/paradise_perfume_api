@@ -20,6 +20,10 @@ use Illuminate\Support\Facades\Mail;
 
 class AuthenticationController extends Controller
 {
+    public function __construct(private UserController $userController, private User $user
+    ) {
+    }
+
     public function test()
     {
         return ['okay, good to start from test'];
@@ -92,7 +96,7 @@ class AuthenticationController extends Controller
             $user->email = $request->input('email');
 
             $user->password = Hash::make($request->password);
-            $user->profile_picture = $user->default_profile;
+            $user->profile_picture = $this->user->default_profile_picture_name;
 
             $client = Client::create([
                 'first_name' => $request->input('first_name'),
@@ -106,16 +110,18 @@ class AuthenticationController extends Controller
             // assign a card to this client
             $card = new Card();
             $client->cards()->save($card);
-
+            // dd($user);
             $user->save();
 
-            $userController = new UserController();
-            $image_uri = $userController->store_profile_picture($user, $request->profile_picture);
             $message = 'user created';
-            if (! $image_uri) {
-                $message = $message.', but could not store the image, using the default picture instead, you still can change this later';
+            // $userController = new UserController();
+            if ($request->profile_picture) {
+                $image_uri = $this->userController->store_profile_picture($user, $request->profile_picture);
+                if (! $image_uri) {
+                    $message = $message.', but could not store the image, using the default picture instead, you still can change this later';
+                }
+                $user->profile_picture = $image_uri;
             }
-            $user->profile_picture = $image_uri;
             $user->save();
             DB::commit();
 

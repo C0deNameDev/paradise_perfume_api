@@ -8,6 +8,10 @@ use Illuminate\Support\Facades\File;
 
 class UserController extends Controller
 {
+    public function __construct(private User $user)
+    {
+    }
+
     public function store_profile_picture(User $user, $image)
     {
         try {
@@ -43,6 +47,9 @@ class UserController extends Controller
             $imageKit = new ImageKitProvider();
             if (! $user) {
                 return $this->sendError('user not found', '', 404);
+            }
+            if (! $user->profile_picture || $user->profile_picture === 'default') {
+                return $this->sendResponse('picture found', $this->user->default_profile_picture);
             }
             $picture = $imageKit->get_profile_picture($user->profile_picture);
             if ($picture) {

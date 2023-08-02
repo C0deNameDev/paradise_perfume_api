@@ -13,11 +13,11 @@ return new class extends Migration
     {
         Schema::create('perfumes', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
+            $table->string('name')->default('perfume name');
             $table->string('picture')->nullable();
-            $table->integer('extra_price');
-            $table->string('sex');
-            $table->string('season');
+            $table->integer('extra_price')->default(0);
+            $table->string('sex')->default('');
+            $table->string('season')->default('');
             $table->timestamps();
         });
     }
