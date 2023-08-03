@@ -19,6 +19,7 @@ class UserResource extends JsonResource
             'id' => $this->id,
             'person_id' => $this->person_id,
             'active' => $this->email_verified_at !== null,
+            'profile_picture' => $this->profile_picture,
         ];
     }
 }

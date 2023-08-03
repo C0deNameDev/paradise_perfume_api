@@ -10,6 +10,12 @@ class SuperAdmin extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'first_name',
+        'last_name',
+        'phone_number',
+    ];
+
     public function user(): MorphOne
     {
         return $this->morphOne(User::class, 'person');

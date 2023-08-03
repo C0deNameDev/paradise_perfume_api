@@ -5,9 +5,9 @@ namespace Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\SuperAdmin>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Sale>
  */
-class SuperAdminFactory extends Factory
+class SaleFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -17,9 +17,7 @@ class SuperAdminFactory extends Factory
     public function definition(): array
     {
         return [
-            'first_name' => 'Mehdi',
-            'last_name' => 'Djebbara',
-            'phone_number' => '0782569328',
+            //
         ];
     }
 }

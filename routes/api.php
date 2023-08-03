@@ -5,6 +5,9 @@ use App\Http\Controllers\BottleController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PerfumeController;
 use App\Http\Controllers\UserController;
+use App\Http\Middleware\AdminMiddleware;
+use App\Http\Middleware\SuperAdminMiddleware;
+use App\Models\SuperAdmin;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -40,24 +43,41 @@ Route::controller(PerfumeController::class)->prefix('/perfumes')->middleware('au
 
 });
 
-Route::controller(UserController::class)->prefix('/user')->group(function () {
-    Route::get('/userPicture/{user_id}', 'get_profile_picture')->middleware('auth:sanctum');
+Route::controller(UserController::class)->prefix('/user')->middleware('auth:sanctum')->group(function () {
+    Route::get('/userPicture/{user_id}', 'get_profile_picture');
+
+    Route::middleware(AdminMiddleware::class)->prefix('/admin')->group(function () {
+        Route::get('/search/{query}', 'search_client');
+    });
 });
 
-Route::controller(BottleController::class)->prefix('/bottles')->group(function () {
+Route::controller(BottleController::class)->prefix('/bottles')->middleware('auth:sanctum')->group(function () {
     Route::get('/', 'index');
     Route::get('/{order_id}', 'get_by_order');
     Route::get('/{bottle_id}', 'get_by_id');
     Route::get('/picture/{bottle_id}', 'get_bottle_picture');
 });
 
-Route::controller(OrderController::class)->prefix('/orders')->group(function () {
-    Route::post('/placeOrder', 'store');
-    Route::get('/delete/{order_id}', 'destroy');
+Route::controller(OrderController::class)->prefix('/orders')->middleware('auth:sanctum')->group(function () {
+    Route::middleware(AdminMiddleware::class)->prefix('/admin')->group(function () {
+        Route::get('/', 'index'); //FETCH ALL ORDERS => ADMIN and SUPERADMIN
+        Route::get('/prepare/bottle/{bottle_id}/order/{order_id}', 'mark_prepared'); // MARK BOTTLE AS PREPARED BY ADMIN/SUPERADMIN
+        Route::get('/pending/{bottle_id}/order/{order_id}', 'mark_pending'); // MARK BOTTLE AS PENDING BY ADMIN/SUPERADMIN
+        Route::get('/prepare/{order_id}', 'prepare_order');
+        Route::get('/close/{order_id}', 'close_order');
+
+    });
+
+    Route::middleware(SuperAdminMiddleware::class)->prefix('/superAdmin')->group(function () {
+        Route::get('/sales', 'get_closed_orders');
+        Route::post('/sales', 'createSale');
+    });
+
+    Route::post('/placeOrder', 'store'); // PLACE A NEW ORDER BY THE CLIENT
+    Route::get('/delete/{order_id}', 'destroy'); // DELETE AN ORDER BY THE CLIENT/ADMIN
     // Route::get('/client/{client_id}', 'get_client_orders');
-    Route::get('/{order_id}/{bottle_id}/mark_prepared', 'mark_prepared');
-    Route::get('/{order_id}/{bottle_id}/mark_pending', 'mark_pending');
-    Route::get('/{order_id}/{bottle_id}/delete', 'delete_bottle_from_order');
-    Route::get('/client/{user_id}', 'get_by_client');
+
+    Route::get('/{order_id}/{bottle_id}/delete', 'delete_bottle_from_order'); // DELETE A BOTTLE FROM THE ORDER BY CLIENT
+    Route::get('/client/{user_id}', 'get_by_client'); // GET ALL ORDERS OF A CLIENT
 
 });

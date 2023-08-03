@@ -18,6 +18,8 @@ class OrderResource extends JsonResource
             'id' => $this->id,
             'client_id' => $this->client_id,
             'perfume_id' => $this->perfume_id,
+            'date' => $this->created_at,
+            'status' => $this->status,
         ];
     }
 }

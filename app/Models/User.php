@@ -30,6 +30,7 @@ class User extends Authenticatable
     public $types = [
         'client' => Client::class,
         'admin' => Admin::class,
+        'super_admin' => SuperAdmin::class,
     ];
 
     protected $fillable = [

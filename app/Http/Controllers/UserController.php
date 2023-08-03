@@ -2,14 +2,81 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Client;
 use App\Models\User;
 use Exception;
 use Illuminate\Support\Facades\File;
 
 class UserController extends Controller
 {
-    public function __construct(private User $user)
+    public function __construct(private User $user, private Client $client)
     {
+    }
+
+    public function search_client($query)
+    {
+
+        try {
+            $user = $this->user::where('email', $query)->get()->first();
+            if ($user) {
+                $client = $user->person;
+                $result = [
+                    ['first_name' => $client->first_name,
+                        'last_name' => $client->last_name,
+                        'profile_picture' => $user->profile_picture,
+                        'phone_number' => $client->phone_number, ],
+                ];
+
+                return $this->sendResponse('user found', $result);
+            }
+
+            $client = $this->client::where('phone_number', $query)->get()->first();
+            if ($client) {
+                $result = [
+                    ['first_name' => $client->first_name,
+                        'last_name' => $client->last_name,
+                        'profile_picture' => $client->user->profile_picture,
+                        'phone_number' => $client->phone_number, ],
+                ];
+
+                return $this->sendResponse('users found', $result);
+            }
+
+            $first_name = explode('_', $query)[0];
+            $last_name = explode('_', $query)[1];
+            $client = null;
+            $client = $this->client::where('first_name', $first_name)->get();
+            $result = [];
+
+            foreach ($client as $c) {
+                array_push($result, [
+                    'first_name' => $c->first_name,
+                    'last_name' => $c->last_name,
+                    'profile_picture' => $c->user->profile_picture,
+                    'phone_number' => $c->phone_number,
+                ]);
+            }
+
+            $client = $this->client::where('first_name', $last_name)->get();
+
+            foreach ($client as $c) {
+                array_push($result, [
+                    'first_name' => $c->first_name,
+                    'last_name' => $c->last_name,
+                    'profile_picture' => $c->user->profile_picture,
+                    'phone_number' => $c->phone_number,
+                ]);
+            }
+
+            if (! empty($result)) {
+                return $this->sendResponse('users found', $result);
+
+            }
+
+            $this->sendError('not found', '', 404);
+        } catch (\Throwable $e) {
+            $this->sendError('internal server error', '', 500);
+        }
     }
 
     public function store_profile_picture(User $user, $image)

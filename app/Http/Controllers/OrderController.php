@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
 use App\Http\Resources\OrderResource;
+use App\Http\Resources\UserResource;
 use App\Models\Bottle;
 use App\Models\bottle_order;
 use App\Models\BottleOrder;
@@ -32,21 +33,62 @@ class OrderController extends Controller
      */
     public function index()
     {
-        //
+
+        $orders = $this->order::all();
+        $orders_coll = [];
+        foreach ($orders as $order) {
+            $total_price = 0;
+            $client = $this->client::find($order->client_id);
+
+            $perfume = $this->perfume::find($order->perfume_id);
+            if (! $perfume) {
+                return $this->sendError('perfume not found', '', 404);
+            }
+
+            $bottlesIds = [];
+
+            foreach ($order->bottles as $bottle) {
+                $quantity = $bottle->pivot->quantity;
+                $status = $bottle->pivot->status;
+                $total_price += ($bottle->price + (($bottle->price * $perfume->extra_price) / 100)) * $quantity;
+                array_push($bottlesIds, $bottle->id);
+
+            }
+
+            array_push($orders_coll, [
+                'id' => $order->id,
+                'perfume_id' => $perfume->id,
+                'status' => $order->status,
+                'created_at' => $order->created_at,
+                'total_price' => $total_price,
+                'bottles' => $bottlesIds,
+                'client' => $client->last_name.$client->first_name,
+                'user' => $client->user ? new UserResource($client->user) : null,
+            ]);
+        }
+
+        return $this->sendResponse('orders retrieved', $orders_coll);
+    }
+
+    public function get_closed_orders()
+    {
+        $orders = $this->order::where('status', 'closed')->get();
+
+        return OrderResource::collection($orders);
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function createSale(StoreOrderRequest $request)
     {
-        //
+        return $this->store($request, 'closed');
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreOrderRequest $request)
+    public function store(StoreOrderRequest $request, $status = 'pending')
     {
         try {
             DB::beginTransaction();
@@ -83,6 +125,8 @@ class OrderController extends Controller
                 $order->bottles()->attach($bottle->id, ['quantity' => $quantities_list[$i]]);
             }
 
+            $order->status = $status;
+
             $order->save();
 
             DB::commit();
@@ -93,6 +137,54 @@ class OrderController extends Controller
             DB::rollBack();
             // Handle the exception and return an error response
             return $this->sendError('Error occurred while storing the order', $e->getMessage(), 500);
+        }
+    }
+
+    public function close_order($order_id)
+    {
+        try {
+            $order = $this->order::find($order_id);
+            if (! $order) {
+                return $this->sendError('order not found', '', 404);
+            }
+
+            if ($order->status === 'prepared') {
+                $order->status = 'closed';
+                $order->save();
+
+                return $this->sendResponse('order closed', new OrderResource($order));
+            } elseif ($order->status === 'pending') {
+                return $this->sendError('cannot close a pending order', '', 510);
+            } else {
+                return $this->sendError('this order is already closed', '', 511);
+            }
+        } catch (Exception $e) {
+            return $this->sendError('internal server error', $e->getMessage(), 500);
+        }
+
+    }
+
+    public function prepare_order($order_id)
+    {
+        try {
+            $order = $this->order::find($order_id);
+            if (! $order) {
+                return $this->sendError('order not found', '', 404);
+            }
+
+            if ($order->status === 'pending') {
+                $order->status = 'prepared';
+                $order->save();
+
+                return $this->sendResponse('order prepared', new OrderResource($order));
+            } elseif ($order->status === 'closed') {
+                return $this->sendError('cannot prepare a closed order', '', 510);
+            } else {
+                return $this->sendError('this order is already prepared', '', 511);
+            }
+
+        } catch (Exception $e) {
+            return $this->sendError('internal server error', $e->getMessage(), 500);
         }
     }
 
