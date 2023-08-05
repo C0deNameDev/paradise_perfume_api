@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AuthenticationController;
 use App\Http\Controllers\BottleController;
+use App\Http\Controllers\CardController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PerfumeController;
 use App\Http\Controllers\UserController;
@@ -20,18 +21,18 @@ use Illuminate\Support\Facades\Route;
 | be assigned to the "api" middleware group. Make something great!
 |
 */
-
+// for Authentication
 Route::controller(AuthenticationController::class)->group(function () {
     Route::get('/auth', 'getAuth')->middleware('auth:sanctum');
     Route::get('/logout', 'logout')->middleware('auth:sanctum');
     Route::post('/authenticate', 'authenticate');
-    Route::post('/signUp', 'signUp');
     Route::get('/sendCofirmSignUp/{userId}', 'sendCofirmSignUp');
     Route::get('/validateSignUp/{userId}/{code}', 'validateSignUp');
     Route::get('/forgotPassword/{email}', 'forgotPassword');
     Route::get('/validateForgotPassword/{userId}/{code}', 'validateForgotPassword');
-    Route::post('/resetPassword', 'resetPassword');
     Route::get('/test', 'test');
+    Route::post('/signUp', 'signUp');
+    Route::post('/resetPassword', 'resetPassword');
 });
 
 Route::controller(PerfumeController::class)->prefix('/perfumes')->middleware('auth:sanctum')->group(function () {
@@ -64,10 +65,10 @@ Route::controller(OrderController::class)->prefix('/orders')->middleware('auth:s
         Route::get('/prepare/bottle/{bottle_id}/order/{order_id}', 'mark_prepared'); // MARK BOTTLE AS PREPARED BY ADMIN/SUPERADMIN
         Route::get('/pending/{bottle_id}/order/{order_id}', 'mark_pending'); // MARK BOTTLE AS PENDING BY ADMIN/SUPERADMIN
         Route::get('/prepare/{order_id}', 'prepare_order');
-        Route::get('/close/{order_id}', 'close_order');
 
     });
 
+    Route::get('/close/{order_id}', 'close_order');
     Route::middleware(SuperAdminMiddleware::class)->prefix('/superAdmin')->group(function () {
         Route::get('/sales', 'get_closed_orders');
         Route::post('/sales', 'createSale');
@@ -80,4 +81,8 @@ Route::controller(OrderController::class)->prefix('/orders')->middleware('auth:s
     Route::get('/{order_id}/{bottle_id}/delete', 'delete_bottle_from_order'); // DELETE A BOTTLE FROM THE ORDER BY CLIENT
     Route::get('/client/{user_id}', 'get_by_client'); // GET ALL ORDERS OF A CLIENT
 
+});
+
+Route::controller(CardController::class)->prefix('/cards')->group(function () {
+    Route::post('/', 'store');
 });

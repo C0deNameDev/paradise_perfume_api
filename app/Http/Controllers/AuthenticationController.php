@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\AuthRequest;
 use App\Http\Requests\ResetPasswordRequest;
 use App\Http\Requests\SignUpRequest;
+use App\Http\Requests\StoreCardRequest;
 use App\Http\Resources\UserResource;
 use App\Mail\ForgotPassMail;
 use App\Mail\SignUpMail;
@@ -20,7 +21,7 @@ use Illuminate\Support\Facades\Mail;
 
 class AuthenticationController extends Controller
 {
-    public function __construct(private UserController $userController, private User $user
+    public function __construct(private UserController $userController, private User $user, private CardController $cardController
     ) {
     }
 
@@ -33,8 +34,14 @@ class AuthenticationController extends Controller
     {
         $user = Auth::user();
 
+        $result = [
+            'first_name' => $user->person->first_name,
+            'last_name' => $user->person->last_name,
+            'email' => $user->email,
+        ];
+
         if ($user) {
-            return $this->sendResponse('Authenticated user retrieved successfully', new UserResource($user));
+            return $this->sendResponse('Authenticated user retrieved successfully', ['info' => $result, 'user' => new UserResource($user)]);
         }
     }
 
@@ -69,6 +76,9 @@ class AuthenticationController extends Controller
     {
         try {
             $user = Auth::user();
+            if ($user) {
+                return $this->sendError('you are not authenticated', '', 401);
+            }
             $user->tokens()->delete();
 
             return $this->sendResponse('user loged out');
@@ -108,8 +118,8 @@ class AuthenticationController extends Controller
             $user->person_type = Client::class;
 
             // assign a card to this client
-            $card = new Card();
-            $client->cards()->save($card);
+            $this->cardController->store(new StoreCardRequest(['user_id' => $user->id, 'payed' => 0]));
+
             // dd($user);
             $user->save();
 

@@ -12,6 +12,7 @@ class Card extends Model
 
     protected $fillable = [
         'client_id',
+        'payed',
     ];
 
     public function client(): BelongsTo

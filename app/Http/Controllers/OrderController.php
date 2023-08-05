@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreCardRequest;
 use App\Http\Requests\StoreOrderRequest;
 use App\Http\Requests\UpdateOrderRequest;
 use App\Http\Resources\OrderResource;
@@ -25,6 +26,7 @@ class OrderController extends Controller
         private BottleOrder $bottleOrder,
         private Perfume $perfume,
         private bottle_order $bottle_order,
+        private CardController $cardController
     ) {
     }
 
@@ -149,8 +151,27 @@ class OrderController extends Controller
             }
 
             if ($order->status === 'prepared') {
+                DB::beginTransaction();
+                $user_id = $order->client->user->id;
+                $payed = 0;
                 $order->status = 'closed';
+                $card = $order->client->cards()->orderBy('created_at', 'desc')->get()->first();
+
+                if ($card->payed < (int) env('max_buys_per_card')) {
+                    if ($card->payed === (int) env('max_buys_per_card') - 1) {
+                        $this->cardController->store(new StoreCardRequest(['user_id' => $user_id, 'payed' => $payed]));
+                    }
+                    $card->payed += 1;
+                    $card->save();
+                } else {
+                    $payed = 1;
+                    $this->cardController->store(new StoreCardRequest(['user_id' => $user_id, 'payed' => $payed]));
+
+                }
+
                 $order->save();
+
+                DB::commit();
 
                 return $this->sendResponse('order closed', new OrderResource($order));
             } elseif ($order->status === 'pending') {
@@ -159,7 +180,7 @@ class OrderController extends Controller
                 return $this->sendError('this order is already closed', '', 511);
             }
         } catch (Exception $e) {
-            return $this->sendError('internal server error', $e->getMessage(), 500);
+            return $this->sendError('internal server error from order controller', $e->getMessage(), 500);
         }
 
     }
@@ -337,7 +358,6 @@ class OrderController extends Controller
 
                 $quantity = $bottle->pivot->quantity;
                 $status = $bottle->pivot->status;
-                // dd($quantity);
                 $total_price += ($bottle->price + (($bottle->price * $perfume->extra_price) / 100)) * $quantity;
                 array_push($bottlesIds, $bottle->id);
                 // array_push($bottles_quant, $quantity);
@@ -356,7 +376,6 @@ class OrderController extends Controller
                 // 'bottles_status' => $bottles_status,
             ]);
         }
-        // dd($orders_coll);
 
         return $this->sendResponse('orders retrieved', $orders_coll);
         /**
