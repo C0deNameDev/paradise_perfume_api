@@ -12,7 +12,7 @@ class Order extends Model
     use HasFactory;
 
     protected $fillable = [
-        // 'bottle_id',
+        'card_id',
         'perfume_id',
         // 'quantity',
         'status',
@@ -32,5 +32,10 @@ class Order extends Model
     public function perfume(): BelongsTo
     {
         return $this->belongsTo(Perfume::class);
+    }
+
+    public function card(): BelongsTo
+    {
+        return $this->belongsTo(Card::class);
     }
 }

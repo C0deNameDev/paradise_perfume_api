@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\Bottle;
+use App\Models\Card;
 use App\Models\Client;
 use App\Models\Perfume;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -26,6 +27,7 @@ class OrderFactory extends Factory
             // 'quantity' => fake()->randomNumber(1, 10),
             'status' => fake()->randomElement($status),
             // 'bottle_id' => Bottle::inRandomOrder()->first()->id,
+            'card_id' => Card::inRandomOrder()->first()->id,
             'perfume_id' => Perfume::inRandomOrder()->first()->id,
             'client_id' => Client::inRandomOrder()->first()->id,
         ];

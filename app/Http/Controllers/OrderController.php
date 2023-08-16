@@ -51,7 +51,6 @@ class OrderController extends Controller
 
             foreach ($order->bottles as $bottle) {
                 $quantity = $bottle->pivot->quantity;
-                $status = $bottle->pivot->status;
                 $total_price += ($bottle->price + (($bottle->price * $perfume->extra_price) / 100)) * $quantity;
                 array_push($bottlesIds, $bottle->id);
 
@@ -95,7 +94,8 @@ class OrderController extends Controller
         try {
             DB::beginTransaction();
             $client = $this->client::find($request->input('client_id'));
-            // $user = User::find($request->input('user_id'));
+            $card = $client->cards()->orderBy('payed', 'asc')->first();
+            // dd($card);
             if (! $client) {
                 return $this->sendError('Client not found', '', 404);
             }
@@ -113,6 +113,9 @@ class OrderController extends Controller
 
             // Associate the perfume
             $order->perfume()->associate($perfume->id);
+
+            // Associate the card
+            $order->card()->associate($card);
 
             $order->save();
 
@@ -162,14 +165,14 @@ class OrderController extends Controller
                         $this->cardController->store(new StoreCardRequest(['user_id' => $user_id, 'payed' => $payed]));
                     }
                     $card->payed += 1;
-                    $card->save();
+                    $card->update();
                 } else {
                     $payed = 1;
                     $this->cardController->store(new StoreCardRequest(['user_id' => $user_id, 'payed' => $payed]));
 
                 }
 
-                $order->save();
+                $order->update();
 
                 DB::commit();
 
@@ -195,7 +198,7 @@ class OrderController extends Controller
 
             if ($order->status === 'pending') {
                 $order->status = 'prepared';
-                $order->save();
+                $order->update();
 
                 return $this->sendResponse('order prepared', new OrderResource($order));
             } elseif ($order->status === 'closed') {
@@ -367,7 +370,7 @@ class OrderController extends Controller
             }
 
             array_push($orders_coll, [
-                'id' => $order->id,
+                'order_id' => $order->id,
                 'perfume_id' => $perfume->id,
                 'status' => $order->status,
                 'total_price' => $total_price,

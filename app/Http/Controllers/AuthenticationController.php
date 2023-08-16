@@ -45,8 +45,14 @@ class AuthenticationController extends Controller
         }
     }
 
+    public function authenticate_with_token($token)
+    {
+
+    }
+
     public function authenticate(AuthRequest $request)
     {
+
         $reqEmail = $request->email;
         $user = User::firstWhere('email', $reqEmail);
         try {
@@ -67,6 +73,23 @@ class AuthenticationController extends Controller
             }
 
             return $this->sendError('wrong email', '', 200);
+
+            // $credentials = ['email' => $request->email, 'password' => $request->password];
+
+            // if (Auth::attempt($credentials)) {
+            //     $request->session()->regenerate();
+            //     $result = [
+            //         'user' => new UserResource($user),
+            //     ];
+
+            //     return $this->sendResponse('user authenticated', $result);
+
+            // }
+
+            // return $this->sendError('The provided credentials do not match our records.', '', 200);
+            // return back()->withErrors([
+            //     'email' => '',
+            // ])->onlyInput('email');
         } catch (Exception $e) {
             return $this->sendError($e->getMessage(), 'something went wrong', 500);
         }
@@ -75,9 +98,9 @@ class AuthenticationController extends Controller
     public function logout()
     {
         try {
-            $user = Auth::user();
-            if ($user) {
-                return $this->sendError('you are not authenticated', '', 401);
+            $user = Auth::guard('sanctum')->user();
+            if (! $user) {
+                return $this->sendError('you are not authenticated', '', 403);
             }
             $user->tokens()->delete();
 
@@ -116,11 +139,12 @@ class AuthenticationController extends Controller
             $user->person()->associate($client);
             $user->person_id = $client->id;
             $user->person_type = Client::class;
+            $user->save();
 
             // assign a card to this client
-            $this->cardController->store(new StoreCardRequest(['user_id' => $user->id, 'payed' => 0]));
-
-            // dd($user);
+            if (! $this->cardController->store(new StoreCardRequest(['user_id' => $user->id, 'payed' => 0]))->getData()->success) {
+                return $this->sendError('error while creating a card', '', 500);
+            }
             $user->save();
 
             $message = 'user created';

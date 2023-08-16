@@ -65,10 +65,9 @@ Route::controller(OrderController::class)->prefix('/orders')->middleware('auth:s
         Route::get('/prepare/bottle/{bottle_id}/order/{order_id}', 'mark_prepared'); // MARK BOTTLE AS PREPARED BY ADMIN/SUPERADMIN
         Route::get('/pending/{bottle_id}/order/{order_id}', 'mark_pending'); // MARK BOTTLE AS PENDING BY ADMIN/SUPERADMIN
         Route::get('/prepare/{order_id}', 'prepare_order');
-
+        Route::get('/close/{order_id}', 'close_order');
     });
 
-    Route::get('/close/{order_id}', 'close_order');
     Route::middleware(SuperAdminMiddleware::class)->prefix('/superAdmin')->group(function () {
         Route::get('/sales', 'get_closed_orders');
         Route::post('/sales', 'createSale');
@@ -83,6 +82,8 @@ Route::controller(OrderController::class)->prefix('/orders')->middleware('auth:s
 
 });
 
-Route::controller(CardController::class)->prefix('/cards')->group(function () {
+Route::controller(CardController::class)->middleware('auth:sanctum')->prefix('/cards')->group(function () {
     Route::post('/', 'store');
+    Route::get('/auth', 'get_auth');
+    Route::get('/info/{card_id}', 'get_card_info');
 });
