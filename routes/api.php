@@ -23,6 +23,8 @@ use Illuminate\Support\Facades\Route;
 */
 // for Authentication
 Route::controller(AuthenticationController::class)->group(function () {
+    
+    Route::post('/authenticate_admin', 'authenticate_admin');
     Route::get('/auth', 'getAuth')->middleware('auth:sanctum');
     Route::get('/logout', 'logout')->middleware('auth:sanctum');
     Route::post('/authenticate', 'authenticate');

@@ -44,6 +44,7 @@ class ImageKitProvider
 
         try {
             $imageKitUrl = env('IMAGEKIT_HOST').env('IMAGEKIT_ID').'/profile_pictures/'.$image_name;
+            
 
             $client = new Client();
             $response = $client->get($imageKitUrl);

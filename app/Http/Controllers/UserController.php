@@ -110,7 +110,7 @@ class UserController extends Controller
     public function get_profile_picture($user_id)
     {
         try {
-            $user = USER::find($user_id);
+            $user = User::find($user_id);
             $imageKit = new ImageKitProvider();
             if (! $user) {
                 return $this->sendError('user not found', '', 404);

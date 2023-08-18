@@ -21,8 +21,7 @@ class UserFactory extends Factory
             'email' => $this->faker->unique()->email,
             'email_verified_at' => null,
             'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
-            // password
-            'profile_picture' => $this->faker->imageUrl,
+            'profile_picture' => "default",
             'one_time_token' => null,
         ];
     }

@@ -9,7 +9,6 @@ use App\Http\Requests\StoreCardRequest;
 use App\Http\Resources\UserResource;
 use App\Mail\ForgotPassMail;
 use App\Mail\SignUpMail;
-use App\Models\Card;
 use App\Models\Client;
 use App\Models\User;
 use Carbon\Carbon;
@@ -18,7 +17,6 @@ use Exception;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-
 class AuthenticationController extends Controller
 {
     public function __construct(private UserController $userController, private User $user, private CardController $cardController
@@ -293,6 +291,7 @@ class AuthenticationController extends Controller
             $user->one_time_token = Hash::make($one_time_token);
             // send the code via email
             Mail::to($user)->send(new SignUpMail($one_time_token));
+            
 
             // if no errors save the user to db
             $user->save();
@@ -302,14 +301,28 @@ class AuthenticationController extends Controller
                 'data' => '',
             ];
         } catch (Exception $e) {
-            dd($e);
+            dd($e);   
             $response = [
                 'success' => false,
-                'message' => 'errors while sending the mail',
+                'message' => 'errors while sending the mail '.$e->getMessage(),
                 'data' => '',
             ];
         }
 
         return $response;
+    }
+
+
+
+    public function authenticate_admin(AuthRequest $request){
+        $user = User::where('email', $request->input('email'))->get()->first();
+        if(!$user){
+            return $this->sendError('user not found', '', 404);
+        }
+        
+        if($user->person_type === Client::class){
+            return $this->sendError('this is a client account, please log in to an Admin or Super Admin account', '', 401);
+        }
+        return $this->authenticate($request);
     }
 }

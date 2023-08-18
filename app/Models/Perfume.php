@@ -21,7 +21,6 @@ class Perfume extends Model
     {
         // $this->default_picture
     }
-
     protected $fillable = [
         'name',
         'extra_price',

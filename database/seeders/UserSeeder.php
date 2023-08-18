@@ -14,7 +14,7 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        $faker = (new UserFactory)->faker;
+        // $faker = UserFactory::new()->faker;
         User::create([
             'email' => 'paradise.perfume.dm@gmail.com',
             'email_verified_at' => null,
@@ -24,14 +24,16 @@ class UserSeeder extends Seeder
             'person_type' => SuperAdmin::class,
             'person_id' => 1,
         ]);
-        for ($i = 0; $i < 10; $i++) {
-            User::create([
-                'email' => $faker->unique()->email,
-                'email_verified_at' => null,
-                'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
-                'profile_picture' => null,
-                'one_time_token' => null,
-            ]);
-        }
+        User::factory()->count(10)->create();
+
+        // for ($i = 0; $i < 10; $i++) {
+        //     User::create([
+        //         'email' => $faker->unique()->email,
+        //         'email_verified_at' => null,
+        //         'password' => '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi',
+        //         'profile_picture' => "default",
+        //         'one_time_token' => null,
+        //     ]);
+        // }
     }
 }

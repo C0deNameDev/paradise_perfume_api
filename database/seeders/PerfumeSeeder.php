@@ -13,7 +13,8 @@ class PerfumeSeeder extends Seeder
      */
     public function run(): void
     {
-        // Perfume::factory()->times(10)->create();
+    // $factory = (new PerfumeFactory);
+        // Perfume::factory()->count(10)->make();
         $perfumeNames = [
             'Enchanted Elixir',
             'Midnight Serenade',
@@ -30,13 +31,14 @@ class PerfumeSeeder extends Seeder
         $sex = ['F', 'M'];
 
         $seasons = ['winter', 'summer', 'spring', 'fall'];
-        $faker = (new PerfumeFactory)->faker;
+        
+
         for ($i = 0; $i < 10; $i++) {
             Perfume::create([
-                'name' => $faker->unique()->randomElement($perfumeNames),
-                'sex' => $faker->randomElement($sex),
-                'season' => $faker->randomElement($seasons),
-                'extra_price' => $faker->numberBetween(0, 1000),
+                'name' => $perfumeNames[array_rand($perfumeNames)],
+                'sex' => $sex[array_rand($sex)],
+                'season' => $seasons[array_rand($seasons)],
+                'extra_price' => rand(0, 200),
                 'picture' => null,
             ]);
         }

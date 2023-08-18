@@ -36,7 +36,7 @@ class PerfumeFactory extends Factory
         $seasons = ['winter', 'summer', 'spring', 'fall'];
 
         return [
-            'name' => $this->faker->unique()->randomElement($perfumeNames),
+            'name' => 'name',
             'sex' => $this->faker->randomElement($sex),
             'season' => $this->faker->randomElement($seasons),
             'extra_price' => $this->faker->numberBetween(0, 1000),

@@ -156,8 +156,10 @@ class OrderController extends Controller
             if ($order->status === 'prepared') {
                 DB::beginTransaction();
                 $user_id = $order->client->user->id;
+                
                 $payed = 0;
                 $order->status = 'closed';
+
                 $card = $order->client->cards()->orderBy('created_at', 'desc')->get()->first();
 
                 if ($card->payed < (int) env('max_buys_per_card')) {
