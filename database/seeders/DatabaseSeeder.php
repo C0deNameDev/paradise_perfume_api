@@ -19,7 +19,7 @@ class DatabaseSeeder extends Seeder
             PerfumeSeeder::class,
             BottleSeeder::class,
             CardSeeder::class,
-            OrderSeeder::class,
+                // OrderSeeder::class,
             SuperAdminSeeder::class,
         ]);
 

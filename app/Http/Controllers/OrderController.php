@@ -36,14 +36,14 @@ class OrderController extends Controller
     public function index()
     {
 
-        $orders = $this->order::all();
+        $orders = $this->order::all()->sortByDesc('created_at');
         $orders_coll = [];
         foreach ($orders as $order) {
             $total_price = 0;
             $client = $this->client::find($order->client_id);
 
             $perfume = $this->perfume::find($order->perfume_id);
-            if (! $perfume) {
+            if (!$perfume) {
                 return $this->sendError('perfume not found', '', 404);
             }
 
@@ -59,12 +59,14 @@ class OrderController extends Controller
             array_push($orders_coll, [
                 'id' => $order->id,
                 'perfume_id' => $perfume->id,
+                'perfume_name' => $perfume->name,
                 'status' => $order->status,
                 'created_at' => $order->created_at,
                 'total_price' => $total_price,
                 'bottles' => $bottlesIds,
-                'client' => $client->last_name.$client->first_name,
+                'client' => $client->last_name . ' ' . $client->first_name,
                 'user' => $client->user ? new UserResource($client->user) : null,
+                'phone_number' => $client->phone_number
             ]);
         }
 
@@ -96,13 +98,13 @@ class OrderController extends Controller
             $client = $this->client::find($request->input('client_id'));
             $card = $client->cards()->orderBy('payed', 'asc')->first();
             // dd($card);
-            if (! $client) {
+            if (!$client) {
                 return $this->sendError('Client not found', '', 404);
             }
 
             $perfume = Perfume::find($request->input('perfume_id'));
-            if (! $perfume) {
-                return $this->sendError('Perfume with ID '.$request->input('perfume_id').' not found', '', 404);
+            if (!$perfume) {
+                return $this->sendError('Perfume with ID ' . $request->input('perfume_id') . ' not found', '', 404);
             }
 
             // New order
@@ -124,8 +126,8 @@ class OrderController extends Controller
 
             for ($i = 0; $i < count($bottles_list); $i++) {
                 $bottle = Bottle::find($bottles_list[$i]);
-                if (! $bottle) {
-                    return $this->sendError('Bottle with ID '.$bottles_list[$i].' not found', '', 404);
+                if (!$bottle) {
+                    return $this->sendError('Bottle with ID ' . $bottles_list[$i] . ' not found', '', 404);
                 }
                 $order->bottles()->attach($bottle->id, ['quantity' => $quantities_list[$i]]);
             }
@@ -149,14 +151,14 @@ class OrderController extends Controller
     {
         try {
             $order = $this->order::find($order_id);
-            if (! $order) {
+            if (!$order) {
                 return $this->sendError('order not found', '', 404);
             }
 
             if ($order->status === 'prepared') {
                 DB::beginTransaction();
                 $user_id = $order->client->user->id;
-                
+
                 $payed = 0;
                 $order->status = 'closed';
 
@@ -194,7 +196,7 @@ class OrderController extends Controller
     {
         try {
             $order = $this->order::find($order_id);
-            if (! $order) {
+            if (!$order) {
                 return $this->sendError('order not found', '', 404);
             }
 
@@ -218,7 +220,7 @@ class OrderController extends Controller
     {
         $client = $this->client::find($client_id);
 
-        if (! $client) {
+        if (!$client) {
             return $this->sendError('client not found', '', 404);
         }
 
@@ -230,7 +232,7 @@ class OrderController extends Controller
     {
         try {
             $order = $this->order::find($order_id);
-            if (! $order) {
+            if (!$order) {
                 return $this->sendError('order not found', '', 404);
             }
             $order->bottles()->updateExistingPivot($bottle_id, ['status' => 'prepared']);
@@ -246,7 +248,7 @@ class OrderController extends Controller
     {
         try {
             $order = $this->order::find($order_id);
-            if (! $order) {
+            if (!$order) {
                 return $this->sendError('order not found', '', 404);
             }
             $order->bottles()->updateExistingPivot($bottle_id, ['status' => 'pending']);
@@ -262,7 +264,7 @@ class OrderController extends Controller
     {
         try {
             $order = $this->order::find($order_id);
-            if (! $order) {
+            if (!$order) {
                 return $this->sendError('order not found', '', 404);
             }
 
@@ -337,12 +339,12 @@ class OrderController extends Controller
     public function get_by_client($user_id)
     {
         $user = $this->user::find($user_id);
-        if (! $user) {
+        if (!$user) {
             return $this->sendError('User not found', '', 404);
         }
 
         $client = $user->person;
-        if (! $client) {
+        if (!$client) {
             return $this->sendError('client not found', '', 404);
         }
 
@@ -352,7 +354,7 @@ class OrderController extends Controller
         foreach ($orders as $order) {
             $total_price = 0;
             $perfume = $this->perfume::find($order->perfume_id);
-            if (! $perfume) {
+            if (!$perfume) {
                 return $this->sendError('perfume not found', '', 404);
             }
 
