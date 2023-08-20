@@ -16,7 +16,7 @@ class ImageKitProvider
         $this->imageKit = new ImageKit(
             env('IMAGEKIT_PUBLIC_KEY'),
             env('IMAGEKIT_PRIVATE_KEY'),
-            env('IMAGEKIT_HOST').env('IMAGEKIT_ID'),
+            env('IMAGEKIT_HOST') . env('IMAGEKIT_ID'),
         );
     }
 
@@ -43,8 +43,8 @@ class ImageKitProvider
     {
 
         try {
-            $imageKitUrl = env('IMAGEKIT_HOST').env('IMAGEKIT_ID').'/profile_pictures/'.$image_name;
-            
+            $imageKitUrl = env('IMAGEKIT_HOST') . env('IMAGEKIT_ID') . '/profile_pictures/' . $image_name;
+
 
             $client = new Client();
             $response = $client->get($imageKitUrl);
@@ -62,7 +62,7 @@ class ImageKitProvider
     public function get_perfume_picture($picture_name)
     {
         try {
-            $imageKitUrl = env('IMAGEKIT_HOST').env('IMAGEKIT_ID').'/perfumes/'.$picture_name;
+            $imageKitUrl = env('IMAGEKIT_HOST') . env('IMAGEKIT_ID') . '/perfumes/' . $picture_name;
 
             $client = new Client();
             $response = $client->get($imageKitUrl);
@@ -80,7 +80,7 @@ class ImageKitProvider
     public function get_bottle_picture($picture_name)
     {
         try {
-            $imageKitUrl = env('IMAGEKIT_HOST').env('IMAGEKIT_ID').'/bottles/'.$picture_name;
+            $imageKitUrl = env('IMAGEKIT_HOST') . env('IMAGEKIT_ID') . '/bottles/' . $picture_name;
 
             $client = new Client();
             $response = $client->get($imageKitUrl);

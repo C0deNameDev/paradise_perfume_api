@@ -41,6 +41,8 @@ class BottleController extends Controller
                     array_push($bottles_status, $status);
                     array_push($bottles_quant, $quantity);
                 }
+            } else {
+                return $this->sendError('order not found', '', 404);
             }
             // foreach ($bottles as $bottle) {
             //     $pivot = $this->bottle_order::where('bottle_id', $bottle->id)->where('order_id', $order_id)->first();
@@ -72,7 +74,7 @@ class BottleController extends Controller
     public function get_by_id($bottle_id)
     {
         $bottle = $this->bottle::find($bottle_id);
-        if (! $bottle) {
+        if (!$bottle) {
             return $this->sendError('bottle not found', '', 404);
         }
 
@@ -82,7 +84,7 @@ class BottleController extends Controller
     public function get_bottle_picture($bottle_id)
     {
         $bottle = $this->bottle::find($bottle_id);
-        if (! $bottle) {
+        if (!$bottle) {
             return $this->sendError('bottle not found', '', 404);
         }
 

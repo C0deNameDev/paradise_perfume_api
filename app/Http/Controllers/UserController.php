@@ -21,10 +21,12 @@ class UserController extends Controller
             if ($user) {
                 $client = $user->person;
                 $result = [
-                    ['first_name' => $client->first_name,
+                    [
+                        'first_name' => $client->first_name,
                         'last_name' => $client->last_name,
                         'profile_picture' => $user->profile_picture,
-                        'phone_number' => $client->phone_number, ],
+                        'phone_number' => $client->phone_number,
+                    ],
                 ];
 
                 return $this->sendResponse('user found', $result);
@@ -33,10 +35,12 @@ class UserController extends Controller
             $client = $this->client::where('phone_number', $query)->get()->first();
             if ($client) {
                 $result = [
-                    ['first_name' => $client->first_name,
+                    [
+                        'first_name' => $client->first_name,
                         'last_name' => $client->last_name,
                         'profile_picture' => $client->user->profile_picture,
-                        'phone_number' => $client->phone_number, ],
+                        'phone_number' => $client->phone_number,
+                    ],
                 ];
 
                 return $this->sendResponse('users found', $result);
@@ -68,7 +72,7 @@ class UserController extends Controller
                 ]);
             }
 
-            if (! empty($result)) {
+            if (!empty($result)) {
                 return $this->sendResponse('users found', $result);
 
             }
@@ -84,13 +88,13 @@ class UserController extends Controller
         try {
             $pattern = '/^(\w+)\|(.+)$/';
 
-            if (! preg_match($pattern, $image, $matches)) {
+            if (!preg_match($pattern, $image, $matches)) {
                 throw new Exception('Invalid image format');
             }
 
             $image_b64 = explode('|', $image)[1];
             $image_b64 = str_replace(' ', '+', $image_b64);
-            $image_name = 'profile_'.$user->id;
+            $image_name = 'profile_' . $user->id;
             // $image_uri = storage_path().'/app/public/profile_pictures/'.$imageName;
             // File::put($image_uri, base64_decode($image_b64));
             $imgKit = new ImageKitProvider();
@@ -112,10 +116,10 @@ class UserController extends Controller
         try {
             $user = User::find($user_id);
             $imageKit = new ImageKitProvider();
-            if (! $user) {
+            if (!$user) {
                 return $this->sendError('user not found', '', 404);
             }
-            if (! $user->profile_picture || $user->profile_picture === 'default') {
+            if (!$user->profile_picture || $user->profile_picture === 'default') {
                 return $this->sendResponse('picture found', $this->user->default_profile_picture);
             }
             $picture = $imageKit->get_profile_picture($user->profile_picture);
@@ -126,8 +130,7 @@ class UserController extends Controller
             return $this->sendError('could not fetch image', '', 500);
 
         } catch (Exception $e) {
-
-            return $this->sendError('error', '', 500);
+            return $this->sendError('error', $e->getMessage(), 500);
         }
     }
 }

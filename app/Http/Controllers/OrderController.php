@@ -60,6 +60,7 @@ class OrderController extends Controller
                 'id' => $order->id,
                 'perfume_id' => $perfume->id,
                 'perfume_name' => $perfume->name,
+                'perfume_extra_price' => $perfume->extra_price,
                 'status' => $order->status,
                 'created_at' => $order->created_at,
                 'total_price' => $total_price,
